@@ -1,0 +1,170 @@
+#include <iostream>
+#include <time.h>
+#include <chrono>
+#include <thread>
+#include <algorithm>
+#include <array>
+using namespace std;
+
+void swap(int* x, int* y)
+{
+    int temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+int Partition(int arr[], int start, int top){
+    int bot, piv;
+    //set the bottom of the partition to be incremented
+    bot = start;
+    //set the pivot of the function to be the end of the array
+    piv = arr[top];    
+   
+    for (int i = start; i < top; i++)
+    {
+        // check if incrementing element is smaller than our pivot        
+        if (arr[i] <= piv)
+        {
+            
+              
+            //if its smaller, places it at the bottom 
+            swap(&arr[bot], &arr[i]);
+            //bottom array increases so it can be placed at the next increment of the bottom without overwriting another element
+            bot++;
+        }
+    }
+    //by the time the above loop ends, the elements over the pivot will have been placed at the end while the lower ones are at the bottomn
+    
+    //because the pivot(end of the array) is still at the end position, set the pivot to its sorted position
+    swap(&arr[bot], &arr[top]);
+    
+    return (bot);
+}
+
+
+//Sort When greater than 10 will be quicksort
+void sort1(int arr[], int start, int top)
+{
+   
+
+    //repeats until reaching the last array element
+    if(start < top)
+    {
+       
+        int p = Partition(arr, start, top);
+
+        // Since the partition is already at the correct position, the elements below and above are the new bounds
+        //Sort elements before the partition
+        sort1(arr, start, p - 1);
+        //sort elements after partition
+        sort1(arr, p + 1, top);
+    }
+}
+//The sort for when size <= 10 will be bubblesort
+void sort2(int array[], int arrSize) {
+    
+
+    //iterate the entire array
+    for (int i = 0; i < arrSize; i++) {
+        // the size is -i because each iteration carries the highest to the back so it no longer needs to be compared
+        for (int j = 1; j < arrSize - i; j++) {
+            int temp;
+            //check if the previous array is greater than the array after
+            if (array[j - 1] > array[j]) {
+                //basic swap in which the value to be replaced is stored, it gets replaced, and then the temporary value is put in an adjacent array
+                temp = array[j];
+                array[j] = array[j - 1];
+                array[j - 1] = temp;
+            }
+
+        }
+    }
+}
+
+
+
+void multiSort(int array[], int arrSize) {
+    //do bubble sort
+    if (arrSize > 10) { sort1(array, 0, arrSize); }
+    //do quicksort
+    if (arrSize <= 10) { sort2(array, arrSize+1); }
+}
+
+
+
+
+
+int main() {
+
+    srand(time(NULL));
+
+    using namespace literals::chrono_literals;
+
+    int arrSize;
+    cout << "Give an array size to sort." << "\n";
+    cin >> arrSize;
+    int* arr1;
+    arr1 = new int[arrSize];
+    int* arr2;
+    arr2 = new int[arrSize];
+    int* arr3;
+    arr3 = new int[arrSize];
+    cout << "\n" << "ARRAY 1" << "\n";
+    for (int i = 0; i < arrSize; i++)
+    {
+        arr1[i] = rand() % 100 + 1;
+        cout << "Arr" << i << ":" << arr1[i] << " " << "\n";
+    }
+    cout << "\n" << "ARRAY 2" << "\n";
+    for (int i = 0; i < arrSize; i++) {
+        arr2[i] = rand() % 100 + 1;
+        cout << "Arr" << i << ":" << arr2[i] << " " << "\n";
+    }
+    cout << "\n" << "ARRAY 3" << "\n";
+    for (int i = 0; i < arrSize; i++) {
+        arr3[i] = rand() % 100 + 1;
+        cout << "Arr" << i << ":" << arr3[i] << " " << "\n";   
+    }
+
+    
+    cout << "\n" << "MULTISORT - ARRAY 1";
+    auto start = chrono::high_resolution_clock::now();
+    multiSort(arr1, arrSize-1);
+    auto end = chrono::high_resolution_clock::now();
+    chrono::duration<float> duration = end - start;
+    cout << "\n" << "This sort took " << duration.count() * 1000 << "ms" << "\n";
+    //arrays size is number of elements minus one
+
+
+    for (int i = 0; i <= arrSize-1; i++) {
+        cout << "ARR" << i << ":" << arr1[i] << "\n";
+    }
+
+    cout << "\n" << "LIBRARY SORT - ARRAY 2";
+
+
+    auto start2 = chrono::high_resolution_clock::now();   
+    sort(arr2,arr2 + arrSize);
+    auto end2 = chrono::high_resolution_clock::now();
+    chrono::duration<float> duration2 = end2 - start2;
+    cout << "\n" << "This sort took " << duration2.count() * 1000 << "ms" << "\n";
+
+    for (int i = 0; i <= arrSize - 1; i++) {
+        cout << "ARR" << i << ":" << arr2[i] << "\n";
+    }
+
+    cout << "\n" << "LIBRARY STABLE SORT - ARRAY 3";
+
+    auto start3 = chrono::high_resolution_clock::now();
+    stable_sort(arr3, arr3 + arrSize);
+    auto end3 = chrono::high_resolution_clock::now();
+    chrono::duration<float> duration3 = end3 - start3;
+    cout << "\n" << "This sort took " << duration3.count() * 1000 << "ms" << "\n";
+
+    for (int i = 0; i <= arrSize - 1; i++) {
+        cout << "ARR" << i << ":" << arr3[i] << "\n";
+    }
+
+
+
+}

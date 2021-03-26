@@ -1,0 +1,205 @@
+// HWQuestion10.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
+
+#include <iostream>
+#include <ctime>
+using namespace std;
+
+
+class node {
+public:
+    int data;
+    node* next;
+};
+
+
+node* buildList(int size) {
+    node* first, * last, * newNode;
+
+    first = last = nullptr;
+    for (int i = 0; i < size; i++) {
+        newNode = new node;
+        newNode->data = rand() % 100 + 1;
+        newNode->next = nullptr;
+
+        
+        //when the list is empty, make the beginning node
+        if (first == nullptr) {
+            first = last = newNode;
+        }
+
+        //otherwise the last link will point to a newly created node deemed the last
+        else {
+            last->next = newNode;
+            last = newNode;
+        }
+
+    }
+    return first;
+}
+//This list to be filled with even is filled with all odd 1s so it knows when to stop reading the list
+node* buildListE(int size) {
+    node* first, * last, * newNode;
+
+    first = last = nullptr;
+    for (int i = 0; i < size; i++) {
+        newNode = new node;
+        newNode->data = 1;
+        newNode->next = nullptr;
+
+
+        //when the list is empty, make the beginning node
+        if (first == nullptr) {
+            first = last = newNode;
+        }
+
+        //otherwise the last link will point to a newly created node deemed the last
+        else {
+            last->next = newNode;
+            last = newNode;
+        }
+
+    }
+    return first;
+}
+//This list to be filled with odds is filled with all even 0s so it knows when to stop reading the list
+node* buildListO(int size) {
+    node* first, * last, * newNode;
+
+    first = last = nullptr;
+    for (int i = 0; i < size; i++) {
+        newNode = new node;
+        newNode->data = 0;
+        newNode->next = nullptr;
+
+
+        //when the list is empty, make the beginning node
+        if (first == nullptr) {
+            first = last = newNode;
+        }
+
+        //otherwise the last link will point to a newly created node deemed the last
+        else {
+            last->next = newNode;
+            last = newNode;
+        }
+
+    }
+    return first;
+}
+
+
+void printList(node* list,int size) {
+
+    for (int i = 0; i < size; i++)
+    {
+
+        cout << "Link" << i << ":" << list->data << " " << "\n";
+        list = list->next;
+
+    }
+
+}
+
+
+//place all odd in the beginning of a cloned ll
+void sortOdd(node* og, node* clone) {  
+    while (og != NULL) {
+        if (og->data % 2 == 1) {
+            clone->data = og->data; clone = clone->next;
+        }
+            og = og->next;
+            
+        }
+    }
+//place all even in the beginning of a cloned ll
+void sortEven(node* og, node* clone) {
+    while (og != NULL) {
+        if (og->data % 2 == 0) {
+            clone->data = og->data; clone = clone->next;
+        }
+        og = og->next;
+
+    }
+}
+void listOrder(node* list, node* Oclone, node* Eclone) {
+    //iterate the odd clone and add it to the ll until there are no more odds
+    while (Oclone->data % 2 == 1) {
+        list->data = Oclone->data;
+        list = list->next;
+        Oclone = Oclone->next;
+    }
+    //then add the remaining even numbers from the even clone
+    while (Eclone->data % 2 == 0) {
+        //this prevents an error when reaching the end of the list
+       
+        list->data = Eclone->data;
+        list = list->next;
+        Eclone = Eclone->next;
+        if (list == nullptr) { break; }
+    }
+
+}
+//delete function to get rid of temporary lists
+void dList(node** head)
+{    node* curr = *head;
+    node* next = NULL;
+
+    while (curr != NULL)
+    {
+        next = curr->next;
+        free(curr);
+        curr = next;
+    }
+    *head = NULL;
+}
+
+void OddEvenSort(node* list,int size) {
+    //make 2 lists that can store odd and even numbers
+    node* list2 = buildListO(size);
+    node* list3 = buildListE(size);
+    //put all the odd numbers in the first section of the odd list, and all even numbers in the first section of the even list
+    sortOdd(list, list2);
+    sortEven(list, list3);
+    //implement the odd list into the original list, then implement the even list
+    listOrder(list, list2, list3);
+    //free up space from the 2 temporary lsits
+    dList(&list2); dList(&list3);
+}
+
+
+int main(){
+    srand(time(NULL));
+
+    cout << "What size should the linked list be? "; int size;
+    cin >> size;
+       
+    node* list = buildList(size);
+   
+   
+    printList(list, size);
+  
+
+    OddEvenSort(list, size);
+
+    cout << "Odd Even Sorted Linked List" << "\n";
+
+    for (int i = 0; i < size; i++)
+    {
+     
+        cout << "Link" << i << ":" << list->data << " ";
+        if (list->data % 2 == 0) { cout << "EVEN"; }
+        else cout << "ODD";
+            cout << "\n";
+        list = list->next;
+
+    }
+   
+    
+
+    
+
+
+}
+
+

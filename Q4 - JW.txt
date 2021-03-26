@@ -1,0 +1,256 @@
+
+
+#include <iostream>
+#include <time.h>
+#include <chrono>
+#include <thread>
+using namespace std;
+//This is hw 1 question 4 for cs313
+class node{
+public:
+    int data;
+    node* next;
+};
+
+//Timer to be placed into every function. By having a start current time in the constructor and end current time in the destructor, it is able to compare both times to receive the runtime of the function.
+
+struct Timer {
+    chrono::time_point<chrono::steady_clock> start, end;
+    chrono::duration<float> duration;
+
+    Timer() {
+        start = chrono::high_resolution_clock::now();
+    }
+
+    ~Timer() {
+        end = chrono::high_resolution_clock::now();
+        duration = end - start;
+        float ms = duration.count() * 1000.0f;
+        cout << "\nThe below sort took " << ms << "ms" << "\n";
+    }
+};
+//a swap for adjacent nodes, 
+ node* swap(node* x, node* y){
+node* temp = y->next;
+y->next = x;
+x->next = temp;
+return y;
+}
+//double pointer allows us to make changes beyond the scope of the function
+void bubbleSortLL(node** head, int size)
+{
+    Timer timer;
+
+    node** current;
+    int i, j;
+
+    for (i = 0; i <= size; i++)
+    {
+
+        current = head;      
+        // it has size -i because each iteration carries the highest to the back so it no longer needs to be compared, and -1 because the last node has nothing after it to be swapped
+        for (j = 0; j < size - i - 1; j++)
+        {
+            
+            node* p1 = *current;
+            //save a node to iterate to after swapping
+            node* p2 = p1->next;
+
+            if (p1->data > p2->data)
+            {
+                swap(p1, p2);
+                //iterate to the next after swapping
+                *current = p2;
+                
+            }           
+            current = &(*current)->next;
+        }
+
+    }
+}
+
+node* buildList(int size) {
+    node *first, *last, *newNode;
+    
+    first = last = nullptr;
+    for (int i = 0; i < size; i++) {
+        newNode = new node;
+        newNode->data = rand() % 100 + 1;
+        newNode->next = nullptr;
+
+        cout << "Link" << i << ":" << newNode->data << " " << "\n";
+
+        //when the list is empty, make the beginning node
+        if (first == nullptr) {
+            first = last = newNode;
+        }        
+
+        //otherwise the last link will point to a newly created node deemed the last
+        else {
+            last->next = newNode;
+                last = newNode;
+        }
+
+    }
+    return first;
+}
+
+//bubble sort for arrays
+void arBubbleSort(int array[], int arrSize) {
+
+    Timer timer;
+
+    //iterate the entire array
+    for (int i = 0; i < arrSize; i++) {
+        // the size is -i because each iteration carries the highest to the back so it no longer needs to be compared
+        for (int j = 1; j < arrSize-i; j++) {
+            int temp;
+            //check if the previous array is greater than the array after
+            if (array[j-1] > array[j]) {
+                //basic swap in which the value to be replaced is stored, it gets replaced, and then the temporary value is put in an adjacent array
+                temp = array[j];
+                array[j] = array[j-1];
+                array[j-1] = temp;
+            }
+
+        }
+    }
+}
+//insertion sort for arrays
+void insertSort(int array[], int arrSize) {
+
+    Timer timer;
+
+    int held, pre;
+    for (int i = 1; i < arrSize; i++){
+        //pre can be used to iterate backwards to upslot every array below the current
+        pre = i - 1;
+        //save the current value since it will be overwritten by upslotted arrays
+        held = array[i];       
+        //continually test if the previous array is greater than the current
+        while (array[pre] > held){
+        //shift the array forward
+         array[pre + 1] = array[pre];
+         //iterate backwards so another comparison made with the current value
+         pre--;
+        }
+        //after everything less than the current has been shifted forward, insert the held value to the array slot after the array slot with a lesser value
+        array[pre + 1] = held;
+    }
+}
+//an insertion function to help sort multiple times in a linked list
+void insert(node** list, node* holder) {
+    node* current;
+    //insert at the beginning, applies when first of the sorted node is greater than the current node
+    if (*list == NULL or (*list)->data >= holder->data) {
+        //insert the held node before the start of the sort list
+        holder->next = *list;
+        //update the sort list so that the current is now the beginning of the sorted list
+        *list = holder;
+    }
+    else {
+        // Locate the node before the point of insertion 
+        current = *list;
+        //check if not at the end and compare adjacent nodes
+        while (current->next != NULL && current->next->data < holder->data){ current = current->next; }
+        //typical node insertion in which the to-be inserted node points to the same node as the one it will "replace"
+        holder->next = current->next;
+        //update the old node to point to the newly inserted node
+        current->next = holder;
+    }
+}
+
+void LLinsertionSort(node** list){
+  Timer timer;
+  node* sortlist = NULL;
+  node* held = *list;
+  //check if at the end
+while (held!=NULL){
+  // in case the current node changes, store the next node to iterate 
+     node* next = held->next;
+    // take the held node to insert it somewhere in the new sorting list
+     insert(&sortlist, held);
+     // Iterate the current node
+    held = next;
+    }
+
+    // convert to the list that has been sorted 
+    *list = sortlist;
+}
+
+
+
+
+int main()
+{
+    //this program will be problem 4 of cs313 hw1. It will compare the times it takes to sort an array vs a linked list using insertion sort and bubble sort
+
+    int arrSize = 0;
+    cout << "What should be the sizes of the array and linked list that will be compared?\n";
+    cin >> arrSize;
+    srand(time(NULL));
+
+    using namespace literals::chrono_literals;
+
+    //build 2 arrays with random numbers for each sort
+    int* array = new int[arrSize];
+    cout << "\n" << "ARRAY 1" << "\n";
+    for (int i = 0; i < arrSize; i++)
+    {
+        array[i] = rand() % 100 + 1;
+        cout << "Arr" << i << ":" << array[i] << " " << "\n";
+    }
+    cout << "\n" << "ARRAY 2" << "\n";
+    int* array2 = new int[arrSize];
+    for (int i = 0; i < arrSize; i++)
+    {
+        array2[i] = rand() % 100 + 1;
+        cout << "Arr" << i << ":" << array[i] << " " << "\n";
+    }
+
+    //build 2 linked lists for each sort
+    cout << "\n" << "Linked List 1" << "\n";
+    node* LinkedList = buildList(arrSize);
+    cout << "\n" << "Linked List 2" << "\n";
+    node* LinkedList2 = buildList(arrSize);
+
+    //sorting begins with bubble sorting
+    //array bubble sort
+    arBubbleSort(array, arrSize);
+    cout << "Bubble Sorted Array \n";  
+    for (int i = 0; i < arrSize; i++)
+    {
+        cout << "Arr" << i << ":" << array[i] << " \n";
+    }
+    //linked list bubble sort
+    bubbleSortLL(&LinkedList, arrSize);
+    cout << "Bubble Sorted Linked List \n";
+    for (int i = 0; i < arrSize; i++)
+    {
+        cout << "LL" << i << ":" << LinkedList->data << " \n";
+        LinkedList = LinkedList->next;
+    }
+
+    //Then insertion sorts
+    
+    insertSort(array2, arrSize);
+    cout << "Insertion Sorted Array 2 \n";
+    for (int i = 0; i < arrSize; i++)
+    {
+        cout << "Arr" << i << ":" << array2[i] << " \n";
+    }
+    
+    LLinsertionSort(&LinkedList2);
+    cout << "Insertion Sorted Linked List 2 \n";
+    for (int i = 0; i < arrSize; i++)
+    {
+        cout << "LL" << i << ":" << LinkedList2->data << " \n";
+        LinkedList2 = LinkedList2->next;
+    }
+
+    //delete the dynamic arrays to free memory
+    
+    delete[] array;
+    delete[] array2;
+}
+

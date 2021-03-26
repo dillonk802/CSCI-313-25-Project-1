@@ -1,0 +1,104 @@
+// HWQuestion6.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
+
+#include <iostream>
+#include <list>
+#include <map>
+#include <ctime>
+
+
+int gcd(int a, int b) {
+    if (b == 0)
+        return a;
+    return gcd(b, a % b);
+}
+
+
+
+
+using namespace std;
+int main()
+{                                      
+    //Plaintext word is HELLOTHISMESSAGEISSUPERSECRETIVE
+    //key is GOODBYEGOODBYEGOODBYEGOODBYEGOOD
+    //Encoded message is NSZOPRLOGAHTQEMSWVTSTKFGHDPIZWJH
+
+    //This program immplies we dont know the key and are trying to find the plaintext
+
+
+    srand(time(NULL));
+
+    //step 1 look for matching letters in the encoded message, it becomes likely the same part of plaintext matches the key
+   string target = "HELLOTHISMESSAGEISSUPERSECRETIVE";
+   
+    string cipher = "NSZOPRLOGAHTQEMSWVTSTKFGHDPIZWJH";
+    
+    map<int, char> matching;
+    for (int i = 0; i <= cipher.length(); i++) {
+        for (int j = i + 1; j <= cipher.length(); j++) {
+            if (cipher[i] == cipher[j]) {
+                matching.emplace(i, cipher[i]); 
+                matching.emplace(j, cipher[j]);
+            }
+        }
+    }
+
+    cout << "matching positions and their letters are:" << "\n";
+    for (auto& x : matching) {
+       cout << x.first << ": " << x.second << '\n';
+    }
+
+    //function to scan for the most frequent matching letter
+    int totalmax = 1; int totalmax2 = 0; int currentmax = 1; char freq, freq2; char cfreq = 'a';
+    for (int i = 0; i <= cipher.length(); i++) {
+        cfreq;
+        for (int j = i + 1; j <= cipher.length(); j++) {
+            if (cipher[i] == cipher[j]) {
+                cfreq = cipher[i];
+                currentmax++;
+            }
+        }
+
+        if ( currentmax > totalmax){totalmax = currentmax; freq = cfreq;}
+        if (currentmax = totalmax) {totalmax2 = currentmax; freq2 = cfreq; }
+        currentmax = 1;
+    }
+
+    cout << "Most frequent letter in the cipher is " << freq << " with " << totalmax << " occurences.";
+    cout << " Second most frequent letter in the cipher is " << freq2 << " with " << totalmax2 << " occurences." << "\n";
+
+
+    // step 2 look for the distance between these matching letters, the common divisor can imply the size of the key
+    list<int> distances;
+    for (int i = 0; i <= cipher.length(); i++) {
+        for (int j = i + 1; j <= cipher.length(); j++) {
+            if (cipher[i] == cipher[j] && (cipher[i] == freq || cipher[i] == freq2)) { distances.push_back(j - i); }
+
+        }
+    }
+
+
+    cout << "Distances between matching letters: \n";
+    for (auto const& i : distances) {
+       cout << i << "\n";      
+    }
+ 
+    
+    //cipher and plaintext must match
+    int counter=0;
+    for (int i = 0; i < cipher.size(); i++) {
+         int erased = 0; string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+         while (cipher[i] != target[i]) {
+             counter++;
+            alphabet.erase(remove(alphabet.begin(), alphabet.end(), cipher[i]), alphabet.end());;
+            erased++;
+        cipher[i] = alphabet[rand() % (25-erased)];
+        cout << "Mutation " << counter << ": " << cipher << "\n";
+        }
+
+    }
+
+
+
+
+}
